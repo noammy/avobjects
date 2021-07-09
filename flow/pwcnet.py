@@ -385,12 +385,12 @@ def calculate_flow_on_video(ims):
 
 def calculate_classic_flow_on_video(ims):
 
-    moduleNetwork = Network().cuda().eval()
+    # moduleNetwork = Network().cuda().eval()
 
     # make sure to not compute gradients for computational performance
-    torch.set_grad_enabled(False)
+    # torch.set_grad_enabled(False)
     # make sure to use cudnn for computational performance
-    torch.backends.cudnn.enabled = True
+    # torch.backends.cudnn.enabled = True
 
     flows = []
     base = np.mgrid[:ims[0].shape[0], :ims[0].shape[1]].astype(np.float32)
