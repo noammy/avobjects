@@ -13,7 +13,7 @@ from load_audio import reconstruct_wav_from_mag_phase, wav2filterbanks
 from utils import (colorize, detect_peaks, extract_attended_features,
                    extract_face_crops, full_to_map, load_model_params,
                    logsoftmax_2d, my_unfold, run_func_in_parts,
-                   calc_flow_on_vid_wrapper)
+                   calc_flow_on_vid_wrapper, calc_classic_flow_on_vid_wrapper)
 from viz_utils import VideoSaver, viz_avobjects, viz_source_separation
 
 
@@ -359,7 +359,7 @@ class DemoEvalTrainer():
             # again in each call and the input images and output flow are passed
             # by copying into shared memory (/dev/shm)
             # This is very suboptimal - not to be used for training
-            flow = calc_flow_on_vid_wrapper(flow_inp[b_id].detach().cpu().numpy(), gpu_id=self.opts.gpu_id)
+            flow = calc_classic_flow_on_vid_wrapper(flow_inp[b_id].detach().cpu().numpy(), gpu_id=self.opts.gpu_id)
             flow = torch.from_numpy(flow).permute([0, 2, 3, 1])  # tchw -> thwc
             flows.append(flow)
         flow = np.stack(flows)
