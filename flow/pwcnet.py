@@ -10,7 +10,7 @@ import torch
 import sys 
 
 from tqdm import tqdm
-
+import cv2
 arguments_strModel = 'default'
 
 ##########################################################
@@ -383,10 +383,43 @@ def calculate_flow_on_video(ims):
     flows_relative = flows - base[None, :]
     return flows_relative
 
+def calculate_classic_flow_on_video(ims):
+
+    moduleNetwork = Network().cuda().eval()
+
+    # make sure to not compute gradients for computational performance
+    torch.set_grad_enabled(False)
+    # make sure to use cudnn for computational performance
+    torch.backends.cudnn.enabled = True
+
+    flows = []
+    base = np.mgrid[:ims[0].shape[0], :ims[0].shape[1]].astype(np.float32)
+    base = base[::-1]
+    base_gr = cv2.cvtColor(base, cv2.COLOR_BGR2GRAY)
+
+    for t in tqdm(range(len(ims) - 1), desc='Calculating Flow'):
+        cur_frame = cv2.cvtColor(ims[t], cv2.COLOR_BGR2GRAY)
+        next_frame = cv2.cvtColor(ims[t+1], cv2.COLOR_BGR2GRAY)
+
+        flow = cv2.calcOpticalFlowFarneback(cur_frame, next_frame, 0.5, 3, 15, 3, 5, 1.2, 0)
+
+            # estimate(moduleNetwork, tensor_from_im(
+            # ims[t]), tensor_from_im(ims[t + 1]))
+        # flow = flow.numpy()
+        # convert flow from relative to absolute coordinates
+        flow = flow + base_gr
+        flows.append(flow)
+
+    flows = np.array(flows)
+    flows_relative = flows - base[None, :]
+    return flows_relative
+
+
 def main():
     input_path = sys.argv[1]
-    output_path = sys.argv[2]
-    gpu_id = sys.argv[3]
+    flow_method = sys.argv[2]
+    output_path = sys.argv[3]
+    gpu_id = sys.argv[4]
 
     # set up gpu 
     os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
@@ -395,7 +428,10 @@ def main():
 
     import numpy as np
     ims = np.load(input_path)
-    flow = calculate_flow_on_video(ims)
+    if flow_method == 'classic':
+        flow = calculate_classic_flow_on_video(ims)
+    else:
+        flow = calculate_flow_on_video(ims)
     np.save(output_path, flow)
 
 if __name__ == '__main__':
