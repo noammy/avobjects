@@ -423,7 +423,7 @@ def run_func_in_parts(func, vid_emb, aud_emb, part_len, dim, device):
 
 # ---------------------- flow wrapper -------------------------
 
-def calc_flow_on_vid_wrapper(ims, tmp_dir='/dev/shm', gpu_id=0):
+def calc_flow_on_vid_wrapper(ims, tmp_dir='./dev/shm', gpu_id=0):
     """
     Wrapper for calling PWC-net through a separate process 
     """

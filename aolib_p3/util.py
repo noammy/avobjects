@@ -2502,7 +2502,7 @@ def host_file(src_fname, dst_fname=None, server_dir='/csail/vision-billf5/aho/ww
         dst_fname = make_temp(os.path.splitext(src_fname)
                               [-1], server_dir).split('/')[-1]
     dst_server = os.path.join(server_dir, dst_fname)
-    os.system('cp %s %s' % (src_fname, dst_server))
+    os.system('copy %s %s' % (src_fname, dst_server))
     os.system('chmod a+rwx %s' % dst_server)
     url = os.path.join(public_url, subdir, dst_fname)
     print(url)

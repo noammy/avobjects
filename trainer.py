@@ -30,11 +30,11 @@ class DemoEvalTrainer():
         self.step = 0
         opts.output_dir = os.path.join(opts.output_dir)
 
-        if os.path.exists(opts.output_dir):
+        #if os.path.exists(opts.output_dir):
             # Clean up old logs
-            command = 'rm %s/* -rf' % (opts.output_dir)
-            print(command)
-            subprocess.call(command, shell=True, stdout=None)
+        #    command = 'rm %s/* -rf' % (opts.output_dir)
+        #    print(command)
+        #    subprocess.call(command, shell=True, stdout=None)
 
         self.checkpoints_path = opts.output_dir + "/checkpoints"
 

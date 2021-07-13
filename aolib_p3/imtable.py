@@ -652,7 +652,10 @@ class Video:
                 fname = ut.make_temp(ext, dir=out_dir)
                 os.remove(fname)
                 if self.copy_method == 'copy':
-                    os.system('cp "%s" %s' % (self.video_fname, fname))
+                    import shutil
+                    print("ccopy: ", self.video_fname, fname)
+                    # shutil.copy(fname, self.video_fname)
+                    os.system('copy "%s" %s' % (self.video_fname, fname))
                 elif self.copy_method == 'symlink':
                     os.system('ln -s "%s" %s' % (self.video_fname, fname))
                 else:

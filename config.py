@@ -42,7 +42,7 @@ def load_opts():
 
     # --- video
     parser.add_argument('--resize',
-                        default=540,
+                        default=130,
                         type=int,
                         help='Scale input video to that resolution')
     parser.add_argument('--fps', type=int, default=25, help='Video input fps')

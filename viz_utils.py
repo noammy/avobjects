@@ -1,8 +1,10 @@
 import os
+import os.path as osp
 import numpy as np
 
 from utils import map_to_full
 
+FFMPEG_EXE = r"C:\Program Files\ffmpeg\bin\ffmpeg.exe"
 
 class VideoSaver:
 
@@ -46,7 +48,7 @@ class VideoSaver:
             outfile = os.path.join(self.savedir, '%03d.mp4' % self.id)
 
         if audio_wav is not None:
-            _, temp_audiofile = tempfile.mkstemp(dir='/dev/shm', suffix='.wav')
+            _, temp_audiofile = tempfile.mkstemp(dir='./dev/shm', suffix='.wav')
             import torch
             if isinstance(audio_wav, torch.Tensor):
                 audio_wav = audio_wav.numpy()
@@ -59,19 +61,26 @@ class VideoSaver:
             os.makedirs(os.path.dirname(outfile))
         except:
             pass
-        _, temp_videofile = tempfile.mkstemp(dir='/dev/shm', suffix='.mp4')
+        _, temp_videofile = tempfile.mkstemp(dir='./dev/shm', suffix='.mp4')
 
         v_clip.write_videofile(temp_videofile, fps=25, verbose=False)
 
         if audio_wav is not None:
+            cur_dir = os.getcwd()
+            os.chdir(osp.dirname(FFMPEG_EXE))
+            print("ffmpeg: ", temp_videofile, temp_audiofile, osp.join(cur_dir, outfile))
             command = ("ffmpeg -threads 1 -loglevel error -y -i {} -i {} " 
                       "-c:v copy -map 0:v:0 -map 1:a:0 -pix_fmt yuv420p "
-                      "-shortest {}").format(temp_videofile, temp_audiofile, outfile)
+                      "-shortest {}").format(temp_videofile, temp_audiofile, osp.join(cur_dir, outfile))
             from subprocess import call
             cmd = command.split(' ')
-            call(cmd)
+            # call(cmd)
+            os.system(command)
+            os.chdir(cur_dir)
+            print("ffmpeg: end\n")
         else:
             import shutil
+            print("move: ", temp_videofile, outfile)
             shutil.move(temp_videofile, outfile)
 
         v_clip.close()

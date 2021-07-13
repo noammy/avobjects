@@ -1,4 +1,5 @@
 import os
+import os.path as osp
 import pickle
 import threading
 
@@ -9,6 +10,8 @@ from tqdm import tqdm
 from load_audio import load_wav
 from load_video import load_mp4
 from utils import colorize
+
+FFMPEG_EXE = r"C:\Program Files\ffmpeg\bin\ffmpeg.exe"
 
 
 class DemoDataset(data.Dataset):
@@ -40,26 +43,31 @@ class DemoDataset(data.Dataset):
         vid_path_25fps = os.path.join(self.data_path, vid_name + '_25fps.mp4')
 
         # -- reencode video to 25 fps
+        cur_dir = os.getcwd()
+        os.chdir(osp.dirname(FFMPEG_EXE))
         command = (
             "ffmpeg -threads 1 -loglevel error -y -i {} -an -r 25 {}".format(
-                vid_path_orig, vid_path_25fps))
-        from subprocess import call
+                osp.join(cur_dir, vid_path_orig), osp.join(cur_dir, vid_path_25fps)))
+        from subprocess import call, run
         cmd = command.split(' ')
         print('Resampling {} to 25 fps'.format(vid_path_orig))
-        call(cmd)
-
+        os.system(command)
+        os.chdir(cur_dir)
         video = self.__load_video__(vid_path_25fps, resize=self.resize)
 
         aud_path = os.path.join(self.data_path, vid_name + '.wav')
 
         if not os.path.exists(aud_path):  # -- extract wav from mp4
+            cur_dir = os.getcwd()
+            os.chdir(osp.dirname(FFMPEG_EXE))
             command = (
                 ("ffmpeg -threads 1 -loglevel error -y -i {} "
                  "-async 1 -ac 1 -vn -acodec pcm_s16le -ar 16000 {}")
-                .format(vid_path_orig, aud_path))
+                .format(osp.join(cur_dir, vid_path_orig), osp.join(cur_dir, aud_path)))
             from subprocess import call
             cmd = command.split(' ')
-            call(cmd)
+            os.system(command)
+            os.chdir(cur_dir)
 
         audio = load_wav(aud_path).astype('float32')
 
