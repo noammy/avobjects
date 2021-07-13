@@ -55,12 +55,13 @@ class Warper():
         """
 
         bs, T, h_full, w_full, _ = flow.shape
+        print(flow.shape)
 
         if self.base is None:
             self.base = np.mgrid[:h_full, :w_full].astype(
                 np.float32)[::-1].copy()
             self.base = torch.from_numpy(self.base).to(flow.device)
-
+        print(self.base.shape)
         tracks = self.base[None].repeat([bs, 1, 1, 1]).to(
             self.device)  # tile over batch to init
         flow_abs = flow.permute([0, 1, 4, 2, 3]) + self.base

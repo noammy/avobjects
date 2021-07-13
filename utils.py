@@ -7,7 +7,7 @@ import math
 from torch import __init__
 from torch import nn
 from tqdm import tqdm
-
+import cv2
 # ----------------- model utils -----------------------------------------------------
 
 
@@ -423,7 +423,7 @@ def run_func_in_parts(func, vid_emb, aud_emb, part_len, dim, device):
 
 # ---------------------- flow wrapper -------------------------
 
-def calc_flow_on_vid_wrapper(ims, tmp_dir='./dev/shm', gpu_id=0):
+def calc_flow_on_vid_wrapper(ims, tmp_dir='./dev/shm', gpu_id=0, flow_method='cnn'):
     """
     Wrapper for calling PWC-net through a separate process 
     """
@@ -436,7 +436,7 @@ def calc_flow_on_vid_wrapper(ims, tmp_dir='./dev/shm', gpu_id=0):
 
     np.save(input_ims_path, ims)
 
-    command = "python flow/pwcnet.py {} {} {}".format(input_ims_path, output_flow_path, gpu_id) 
+    command = "python flow/pwcnet.py {} {} {} {}".format(input_ims_path, flow_method, output_flow_path, gpu_id)
     from subprocess import call
     cmd = command.split(' ')
     call(cmd)
@@ -446,7 +446,34 @@ def calc_flow_on_vid_wrapper(ims, tmp_dir='./dev/shm', gpu_id=0):
     os.remove(input_ims_path)
     os.remove(output_flow_path)
 
-    return flow 
+    return flow
+
+
+def calc_classic_flow_on_vid_wrapper(ims, tmp_dir='./dev/shm', gpu_id=0, flow_method='classic'):
+    """
+    Wrapper for calling PWC-net through a separate process
+    """
+
+    # Free GPU memory before running flow in another process.
+    torch.cuda.empty_cache()
+
+    input_ims_path = tempfile.NamedTemporaryFile(suffix='.npy', dir=tmp_dir).name
+    output_flow_path = tempfile.NamedTemporaryFile(suffix='.npy', dir=tmp_dir).name
+
+    np.save(input_ims_path, ims)
+
+    command = "python flow/pwcnet.py {} {} {} {}".format(input_ims_path, flow_method, output_flow_path, gpu_id)
+    from subprocess import call
+    cmd = command.split(' ')
+    call(cmd)
+
+    flow = np.load(output_flow_path)
+    print(flow.shape)
+    os.remove(input_ims_path)
+    os.remove(output_flow_path)
+
+    return flow
+
 
 # -------------------------- colorize utils -----------------------------------------------
 """

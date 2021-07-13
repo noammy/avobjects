@@ -64,13 +64,13 @@ def load_opts():
 
     parser.add_argument('--nms_thresh',
                         type=int,
-                        default=100,
+                        default=60,
                         help='Area for thresholding nms in pixels')
 
     # -- viz
     parser.add_argument('--const_box_size',
                         type=int,
-                        default=80,
+                        default=50,
                         help='Size of bounding box in visualization')
 
     args = parser.parse_args()
